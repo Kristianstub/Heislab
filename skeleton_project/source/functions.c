@@ -11,8 +11,10 @@ void resetposition(void){
     }
 }
 
-void floorLight(void) {
+void floorLight(void){
     if (elevio_floorSensor() != -1) {
         elevio_floorIndicator(elevio_floorSensor());
     }
 }
+
+void addToRequest(void){}

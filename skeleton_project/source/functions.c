@@ -1,5 +1,6 @@
 #pragma once
 #include "driver/elevio.h"
+
 void resetposition(void){
     int floor = elevio_floorSensor();
     if(floor != 0){
@@ -7,5 +8,11 @@ void resetposition(void){
             elevio_motorDirection(DIRN_DOWN);
         }
         elevio_motorDirection(DIRN_STOP);
+    }
+}
+
+void FloorLight(void) {
+    if (elevio_floorSensor() != -1) {
+        elevio_floorIndicator(elevio_floorSensor())
     }
 }

@@ -14,7 +14,9 @@ int main(){
     resetposition();
     elevio_motorDirection(DIRN_UP);
 
-    
+    while(1){
+        floorLight();
+    }
 
     return 0;
 }

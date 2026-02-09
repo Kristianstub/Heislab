@@ -9,6 +9,7 @@ int direction = 0;
 
 int doorstate = 0;
 int obstructionstate;
+int lastvisitedfloor = 0;
 
 void resetPosition(void){
     int floor = elevio_floorSensor();
@@ -70,8 +71,29 @@ void addToRequest(int floor, int btn){
 
 void goToFloor(int floor){
     int currentFloor = elevio_floorSensor();
-  
+    
+
+    
+
     while (floor != currentFloor){
+
+        if (direction == 0){
+            for (int i = lastvisitedfloor; i < floor; i++){
+                if (queue[i][0] == true){
+                    goToFloor(i);
+                }
+            }
+
+        }
+
+        else {
+            for (int i = lastvisitedfloor; i > floor; i--){
+                if (queue[i][1] == true){
+                    goToFloor(i);
+                }
+            }
+        }
+
         if (doorstate == 0){
             if (floor < currentFloor) {
                 elevio_motorDirection(-1);
@@ -90,9 +112,8 @@ void goToFloor(int floor){
         }
         
     }
-    elevio_buttonLamp(floor, 0, 0);
-    elevio_buttonLamp(floor, 1, 0);
     elevio_buttonLamp(floor, 2, 0);
+    lastvisitedfloor = floor;
 
     elevio_motorDirection(0);
     openDoor();
@@ -142,6 +163,7 @@ void navigateQueue(void){
                         closeDoor();
                     }
                     goToFloor(floor);
+                    elevio_buttonLamp(floor, 0, 0);
                     queue[floor][direction] = false;
                 }
             }
@@ -159,6 +181,7 @@ void navigateQueue(void){
                         closeDoor();
                     }
                     goToFloor(floor);
+                    elevio_buttonLamp(floor, 1, 0);
                     queue[floor][direction] = false;
                 }
             }

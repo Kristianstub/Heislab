@@ -64,7 +64,12 @@ void goToFloor(int floor){
 
     while (floor != currentFloor){
         if (doorstate == 0){
-            elevio_motorDirection(motordirection);
+            if (floor < currentFloor) {
+                elevio_motorDirection(-1);
+            }
+            if (floor > currentFloor) {
+                elevio_motorDirection(1);
+            }
         }
         
         currentFloor = elevio_floorSensor();

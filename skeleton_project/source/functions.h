@@ -2,12 +2,16 @@
 
 #define N_HEADING_STATES 2
 
-typedef enum {
-    HEAD_UP     = 1,
-    HEAD_DOWN   = 0
-} HeadingState
+typedef enum
+{
+    HEAD_UP = 0,
+    HEAD_DOWN = 1
+} HeadingState;
 
-bool requests[N_FLOORS][N_HEADING_STATES]; //Fortsett her!!!!
 
-void resetposition(void);
+void resetPosition(void);
 void floorLight(void);
+void checkButtons(void);
+void navigateQueue(void);
+void goToFloor(int floor);
+void addToRequest(int floor, int btn);

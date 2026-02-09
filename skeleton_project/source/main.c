@@ -13,6 +13,7 @@ int main()
 
     printf("=== Example Program ===\n");
     printf("Press the stop button on the elevator panel to exit\n");
+    clearQueue();
     resetPosition();
 
     while (1)
@@ -21,7 +22,7 @@ int main()
         checkButtons();
         navigateQueue();
         nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
-        
+
     }
 
     return 0;

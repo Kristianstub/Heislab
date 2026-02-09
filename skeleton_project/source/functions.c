@@ -27,28 +27,45 @@ void floorLight(void){
 }
 
 void addToRequest(int floor, int btn){
+    elevio_buttonLamp(floor, btn, 1);
+    
     int currentFloor = elevio_floorSensor();
-    switch (btn){
-        case 0:
-            queue[floor][0] = true;
-            break;
+    if (floor == currentFloor){
+        openDoor();
+        time_t start_time = time(NULL);
+        time_t stop_time = start_time + 3;
 
-        case 1:
-            queue[floor][1] = true;
-            break;
+        while (time(NULL) < stop_time){
+            checkButtons();
+        }
+        
+        closeDoor();
+        elevio_buttonLamp(floor, btn, 0);
 
-
-        case 2:
-            if (floor < currentFloor){
-                queue[floor][1] = true;
-            }
-
-            else if (floor > currentFloor){
-                queue[floor][0] = true;
-            }
-            break;
     }
-   
+
+    else{
+        switch (btn){
+            case 0:
+                queue[floor][0] = true;
+                break;
+
+            case 1:
+                queue[floor][1] = true;
+                break;
+
+
+            case 2:
+                if (floor < currentFloor){
+                    queue[floor][1] = true;
+                }
+
+                else if (floor > currentFloor){
+                    queue[floor][0] = true;
+                }
+                break;
+        }
+    }
 }
 
 void goToFloor(int floor){
@@ -73,11 +90,14 @@ void goToFloor(int floor){
         }
         
     }
+    elevio_buttonLamp(floor, 0, 0);
+    elevio_buttonLamp(floor, 1, 0);
+    elevio_buttonLamp(floor, 2, 0);
 
     elevio_motorDirection(0);
     openDoor();
     time_t start_time = time(NULL);
-    time_t stop_time = start_time + 5;
+    time_t stop_time = start_time + 3;
 
     while (time(NULL) < stop_time){
         checkButtons();
@@ -182,6 +202,12 @@ void clearQueue(void){
     for (int floor = 0; floor < N_FLOORS; floor++){
         for (int btn = 0; btn < N_HEADING_STATES; btn++){
             queue[floor][btn] = false;
+        }
+    }
+
+     for (int floor = 0; floor < N_FLOORS; floor++){
+        for (int btn = 0; btn < N_BUTTONS; btn++){
+            elevio_buttonLamp(floor, btn, 0);
         }
     }
 }

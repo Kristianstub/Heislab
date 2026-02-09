@@ -8,6 +8,7 @@ bool queue[N_FLOORS][N_HEADING_STATES];
 int direction = 0;
 
 int doorstate = 0;
+int obstructionstate;
 
 void resetPosition(void){
     int floor = elevio_floorSensor();
@@ -52,16 +53,7 @@ void addToRequest(int floor, int btn){
 
 void goToFloor(int floor){
     int currentFloor = elevio_floorSensor();
-    int motordirection;
-
-    if (direction == 0){
-        motordirection = 1;
-    }
-
-    else{
-        motordirection = -1;
-    }
-
+  
     while (floor != currentFloor){
         if (doorstate == 0){
             if (floor < currentFloor) {
@@ -71,16 +63,51 @@ void goToFloor(int floor){
                 elevio_motorDirection(1);
             }
         }
+        if (elevio_floorSensor() != -1){
+            currentFloor = elevio_floorSensor();
+        }
         
-        currentFloor = elevio_floorSensor();
         floorLight();
-        checkButtons();
+        if (checkButtons() == 1){
+            break;
+        }
         
     }
 
     elevio_motorDirection(0);
+    openDoor();
+    time_t start_time = time(NULL);
+    time_t stop_time = start_time + 5;
+
+    while (time(NULL) < stop_time){
+        checkButtons();
+    }
+    
+    closeDoor();
+    
     
 
+}
+
+void openDoor(void){
+    if (elevio_floorSensor() != -1){
+        doorstate = 1;
+        elevio_doorOpenLamp(1);
+    }
+    
+}
+
+void closeDoor(void){
+    if (!elevio_obstruction()){
+        doorstate = 0;
+        elevio_doorOpenLamp(0);
+        
+    }
+
+    else {
+        checkButtons();
+        closeDoor();
+    }
 }
 
 void navigateQueue(void){
@@ -88,6 +115,12 @@ void navigateQueue(void){
         case 0:
             for (int floor = 0; floor < N_FLOORS; floor++){
                 if (queue[floor][direction] == true){
+                    if (doorstate == 1){
+                        while (elevio_obstruction()){
+
+                        }
+                        closeDoor();
+                    }
                     goToFloor(floor);
                     queue[floor][direction] = false;
                 }
@@ -99,6 +132,12 @@ void navigateQueue(void){
         case 1:
             for (int floor = N_FLOORS - 1; floor > -1; floor--){
                 if (queue[floor][direction] == true){
+                    if (doorstate == 1){
+                        while (elevio_obstruction()){
+
+                        }
+                        closeDoor();
+                    }
                     goToFloor(floor);
                     queue[floor][direction] = false;
                 }
@@ -108,30 +147,41 @@ void navigateQueue(void){
     }
 }
 
-void checkButtons(void){
+int checkButtons(void){
     if (elevio_stopButton()){
 
         elevio_motorDirection(0);
         elevio_stopLamp(1);
+        clearQueue();
+        
+        while(elevio_stopButton()){
 
-        bool stop = true;
-        nanosleep(&(struct timespec){0, 1000*1000*1000}, NULL);
-        while (stop == true){
-            if (elevio_stopButton()){
-                stop = false;
-            }
         }
 
         elevio_stopLamp(0);
+        return 1;
 
         
     }
+
+    obstructionstate = elevio_obstruction();
+    
 
     for (int floor = 0; floor < N_FLOORS; floor++){
         for (int btn = 0; btn < N_BUTTONS; btn++){
             if (elevio_callButton(floor,btn)){
                 addToRequest(floor,btn);
             }
+        }
+    }
+    return 0;
+}
+
+
+void clearQueue(void){
+    for (int floor = 0; floor < N_FLOORS; floor++){
+        for (int btn = 0; btn < N_HEADING_STATES; btn++){
+            queue[floor][btn] = false;
         }
     }
 }

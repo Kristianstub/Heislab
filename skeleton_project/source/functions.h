@@ -11,7 +11,10 @@ typedef enum
 
 void resetPosition(void);
 void floorLight(void);
-void checkButtons(void);
+int checkButtons(void);
 void navigateQueue(void);
 void goToFloor(int floor);
 void addToRequest(int floor, int btn);
+void clearQueue(void);
+void closeDoor(void);
+void openDoor(void);

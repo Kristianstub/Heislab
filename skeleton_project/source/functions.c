@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "functions.h"
 #include <time.h>
+#include <stdio.h>
+
 
 bool queue[N_FLOORS][N_HEADING_STATES];
 int direction = 0;
@@ -31,6 +33,7 @@ void addToRequest(int floor, int btn){
     elevio_buttonLamp(floor, btn, 1);
     
     int currentFloor = elevio_floorSensor();
+    
     if (floor == currentFloor){
         openDoor();
         time_t start_time = time(NULL);
@@ -81,6 +84,7 @@ void goToFloor(int floor){
             for (int i = lastvisitedfloor; i < floor; i++){
                 if (queue[i][0] == true){
                     goToFloor(i);
+                    
                 }
             }
 
@@ -108,10 +112,12 @@ void goToFloor(int floor){
         
         floorLight();
         if (checkButtons() == 1){
-            break;
+            return;
         }
         
     }
+    queue[floor][0] = false;
+    queue[floor][1] = false;
     elevio_buttonLamp(floor, 2, 0);
     lastvisitedfloor = floor;
 
@@ -139,16 +145,11 @@ void openDoor(void){
 }
 
 void closeDoor(void){
-    if (!elevio_obstruction()){
-        doorstate = 0;
-        elevio_doorOpenLamp(0);
-        
-    }
-
-    else {
+    while (elevio_obstruction()) {
         checkButtons();
-        closeDoor();
     }
+    doorstate = 0;
+    elevio_doorOpenLamp(0);
 }
 
 void navigateQueue(void){
@@ -231,6 +232,14 @@ void clearQueue(void){
      for (int floor = 0; floor < N_FLOORS; floor++){
         for (int btn = 0; btn < N_BUTTONS; btn++){
             elevio_buttonLamp(floor, btn, 0);
+        }
+    }
+}
+
+void printQueue(void){
+    for (int floor = 0; floor < N_FLOORS; floor++){
+        for (int btn = 0; btn < N_HEADING_STATES; btn++){
+            printf("queue[%d][%d] = %d\n", floor, btn, queue[floor][btn]);
         }
     }
 }

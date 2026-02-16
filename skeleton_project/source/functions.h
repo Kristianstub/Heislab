@@ -18,3 +18,4 @@ void addToRequest(int floor, int btn);
 void clearQueue(void);
 void closeDoor(void);
 void openDoor(void);
+void printQueue(void);

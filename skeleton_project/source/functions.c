@@ -89,6 +89,34 @@ void goToFloor(int floor){
     while (floor != currentFloor) {
         if (elevio_floorSensor() != -1) {
             currentFloor = elevio_floorSensor();
+
+            // Check if this intermediate floor has a request in our travel direction
+            int heading = (floor > currentFloor) ? 0 : 1;
+            if (currentFloor != floor && queue[currentFloor][heading]) {
+                // Stop and service this floor
+                elevio_motorDirection(DIRN_STOP);
+                lastvisitedfloor = currentFloor;
+
+                queue[currentFloor][0] = false;
+                queue[currentFloor][1] = false;
+                for (int btn = 0; btn < N_BUTTONS; btn++) {
+                    elevio_buttonLamp(currentFloor, btn, 0);
+                }
+
+                openDoor();
+                time_t stop_time = time(NULL) + 3;
+                while (time(NULL) < stop_time) {
+                    checkButtons();
+                }
+                closeDoor();
+
+                // Resume moving toward target
+                if (floor > currentFloor) {
+                    elevio_motorDirection(DIRN_UP);
+                } else {
+                    elevio_motorDirection(DIRN_DOWN);
+                }
+            }
         }
         floorLight();
         if (checkButtons() == 1) {

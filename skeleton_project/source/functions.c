@@ -42,8 +42,9 @@ void addToRequest(int floor, int btn)
 
     int currentFloor = elevio_floorSensor();
 
-    if (floor == currentFloor)
-    {
+   /*  if (floor == currentFloor)
+    {   
+        
         openDoor();
         time_t start_time = time(NULL);
         time_t stop_time = start_time + 3;
@@ -55,10 +56,10 @@ void addToRequest(int floor, int btn)
 
         closeDoor();
         elevio_buttonLamp(floor, btn, 0);
-    }
+    } */
 
-    else
-    {
+    
+    
         switch (btn)
         {
         case 0:
@@ -83,7 +84,7 @@ void addToRequest(int floor, int btn)
             }
             break;
         }
-    }
+    
 }
 
 void goToFloor(int flr)
@@ -140,7 +141,9 @@ void goToFloor(int flr)
                 time_t stop_time = time(NULL) + 3;
                 while (time(NULL) < stop_time)
                 {
-                    checkButtons();
+                    if (checkButtons() == 1){
+                        return;
+                    }
                 }
                 closeDoor();
 
@@ -151,7 +154,7 @@ void goToFloor(int flr)
                 }
                 else
                 {
-                    elevio_motorDirection(DIRN_DOWN);
+                    elgoToFloevio_motorDirection(DIRN_DOWN);
                 }
             }
         }
@@ -187,6 +190,9 @@ void openDoor(void)
     {
         doorstate = 1;
         elevio_doorOpenLamp(1);
+    }
+    else{
+        elevio_doorOpenLamp(0);
     }
 }
 
@@ -249,6 +255,7 @@ void navigateQueue(void)
 int stopButton()
 {
     elevio_motorDirection(0);
+    
     elevio_stopLamp(1);
     clearQueue();
 
@@ -265,11 +272,31 @@ int stopButton()
         }
     }
 
+    else{
+        openDoor();
+
+    }
+
     while (elevio_stopButton())
     {
     }
 
+
     elevio_stopLamp(0);
+
+   
+        time_t start_time = time(NULL);
+        time_t stop_time = start_time + 3;
+
+        while (time(NULL) < stop_time && elevio_floorSensor() != -1)
+        {
+            checkButtons();
+        }
+
+        
+        if (elevio_floorSensor() != -1){
+            closeDoor();
+        }
     return 1;
 }
 int checkButtons(void)

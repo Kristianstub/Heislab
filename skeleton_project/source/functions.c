@@ -38,7 +38,10 @@ void floorLight(void)
 
 void addToRequest(int floor, int btn)
 {
+    
+    
     elevio_buttonLamp(floor, btn, 1);
+    
 
     int currentFloor = elevio_floorSensor();
 
@@ -71,7 +74,7 @@ void addToRequest(int floor, int btn)
             break;
 
         case 2:
-            if (floor < currentFloor)
+            if (floor <= currentFloor)
             {
                 queue[floor][1] = true;
                 queue[floor][0] = true;
@@ -115,7 +118,7 @@ void goToFloor(int flr)
     {
         elevio_motorDirection(DIRN_DOWN);
     }
-
+    
     while (flr != currentFloor)
     {
         if (elevio_floorSensor() != -1)
@@ -154,7 +157,7 @@ void goToFloor(int flr)
                 }
                 else
                 {
-                    elgoToFloevio_motorDirection(DIRN_DOWN);
+                    elevio_motorDirection(DIRN_DOWN);
                 }
             }
         }

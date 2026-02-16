@@ -22,7 +22,7 @@ int main()
         checkButtons();
         navigateQueue();
         nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
-        printQueue();
+        
     }
 
     return 0;

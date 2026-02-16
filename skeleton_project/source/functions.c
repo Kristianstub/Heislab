@@ -74,66 +74,43 @@ void addToRequest(int floor, int btn){
 
 void goToFloor(int floor){
     int currentFloor = elevio_floorSensor();
-    
+    if (currentFloor == -1) {
+        currentFloor = lastvisitedfloor;
+    }
 
-    
+    if (floor == currentFloor) {
+        // Already at target floor
+    } else if (floor > currentFloor) {
+        elevio_motorDirection(DIRN_UP);
+    } else {
+        elevio_motorDirection(DIRN_DOWN);
+    }
 
-    while (floor != currentFloor){
-
-        if (direction == 0){
-            for (int i = lastvisitedfloor; i < floor; i++){
-                if (queue[i][0] == true){
-                    goToFloor(i);
-                    
-                }
-            }
-
-        }
-
-        else {
-            for (int i = lastvisitedfloor; i > floor; i--){
-                if (queue[i][1] == true){
-                    goToFloor(i);
-                }
-            }
-        }
-
-        if (doorstate == 0){
-            if (floor < currentFloor) {
-                elevio_motorDirection(-1);
-            }
-            if (floor > currentFloor) {
-                elevio_motorDirection(1);
-            }
-        }
-        if (elevio_floorSensor() != -1){
+    while (floor != currentFloor) {
+        if (elevio_floorSensor() != -1) {
             currentFloor = elevio_floorSensor();
         }
-        
         floorLight();
-        if (checkButtons() == 1){
+        if (checkButtons() == 1) {
             return;
         }
-        
     }
-    queue[floor][0] = false;
-    queue[floor][1] = false;
-    elevio_buttonLamp(floor, 2, 0);
+
+    elevio_motorDirection(DIRN_STOP);
     lastvisitedfloor = floor;
 
-    elevio_motorDirection(0);
-    openDoor();
-    time_t start_time = time(NULL);
-    time_t stop_time = start_time + 3;
+    queue[floor][0] = false;
+    queue[floor][1] = false;
+    for (int btn = 0; btn < N_BUTTONS; btn++) {
+        elevio_buttonLamp(floor, btn, 0);
+    }
 
-    while (time(NULL) < stop_time){
+    openDoor();
+    time_t stop_time = time(NULL) + 3;
+    while (time(NULL) < stop_time) {
         checkButtons();
     }
-    
     closeDoor();
-    
-    
-
 }
 
 void openDoor(void){

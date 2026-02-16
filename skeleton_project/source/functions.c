@@ -14,6 +14,7 @@ int obstructionstate;
 int lastvisitedfloor = 0;
 int segment = 0;
 float stopfloor = 0;
+bool hasstopped = false;
 
 void resetPosition(void)
 {
@@ -167,6 +168,7 @@ void goToFloor(int flr)
             return;
         }
     }
+    hasstopped = false;
 
     elevio_motorDirection(DIRN_STOP);
     lastvisitedfloor = flr;
@@ -262,8 +264,9 @@ int stopButton()
     elevio_stopLamp(1);
     clearQueue();
 
-    if (elevio_floorSensor() == -1)
+    if (elevio_floorSensor() == -1 && !hasstopped )
     {
+        hasstopped = true;
         if (direction == 0)
         {
             stopfloor = lastvisitedfloor + 0.5;
@@ -348,11 +351,6 @@ void clearQueue(void)
 
 void printQueue(void)
 {
-    for (int floor = 0; floor < N_FLOORS; floor++)
-    {
-        for (int btn = 0; btn < N_HEADING_STATES; btn++)
-        {
-            printf("queue[%d][%d] = %d\n", floor, btn, queue[floor][btn]);
-        }
-    }
+    
+        
 }
